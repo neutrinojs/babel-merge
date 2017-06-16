@@ -1,5 +1,5 @@
 # babel-merge
-[![NPM version][npm-image]][npm-url] [![NPM downloads][npm-downloads]][npm-url] [![Join Slack][slack-image]][slack-url]
+[![NPM version][npm-image]][npm-url] [![NPM downloads][npm-downloads]][npm-url]
 
 `babel-merge` takes two Babel configuration objects and merges them into a single copy.
 Plugin and preset objects and arrays will be merged together.
