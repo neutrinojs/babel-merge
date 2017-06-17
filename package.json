@@ -1,9 +1,10 @@
 {
   "name": "babel-merge",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "index.js",
   "author": "Eli Perelman <eli@eliperelman.com>",
   "license": "MIT",
+  "repository": "eliperelman/babel-merge",
   "dependencies": {
     "deepmerge": "^1.4.3",
     "object.omit": "^2.0.1"

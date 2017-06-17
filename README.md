@@ -163,6 +163,39 @@ console.log(together);
 }
 ```
 
+Order is preserved between non-option plugins and presets and ones with options:
+
+```js
+const merge = require('babel-merge');
+
+const together = merge(
+  {
+    plugins: [
+      'fast-async',
+      'babel-plugin-syntax-dynamic-import'
+    ]
+  },
+  {
+    plugins: [
+      'babel-plugin-transform-object-rest-spread',
+      ['fast-async', { spec: true }],
+      'babel-plugin-transform-class-properties'
+    ]
+  }
+)
+
+console.log(together);
+
+{
+  plugins: [
+    ['fast-async', { 'spec': true }],
+    'babel-plugin-syntax-dynamic-import',
+    'babel-plugin-transform-object-rest-spread',
+    'babel-plugin-transform-class-properties'
+  ]
+}
+```
+
 [npm-image]: https://img.shields.io/npm/v/babel-merge.svg
 [npm-downloads]: https://img.shields.io/npm/dt/babel-merge.svg
 [npm-url]: https://npmjs.org/package/babel-merge
