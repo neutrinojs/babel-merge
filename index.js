@@ -16,6 +16,10 @@ function mergeArray(source = [], overrides = []) {
     const base = reduction.find((base) => {
       const baseName = Array.isArray(base) ? base[0] : base;
 
+      if (!baseName) {
+        return false;
+      }
+
       return baseName === overrideName || baseName.includes(overrideName);
     });
 
