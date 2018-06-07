@@ -1,7 +1,7 @@
 # babel-merge
 [![NPM version][npm-image]][npm-url] [![NPM downloads][npm-downloads]][npm-url]
 
-`babel-merge` takes two Babel configuration objects and merges them into a single copy.
+`babel-merge` merges multiple Babel configuration objects into a single copy.
 Plugin and preset objects and arrays will be merged together.
 
 ## Requirements
@@ -27,13 +27,18 @@ Plugin and preset objects and arrays will be merged together.
 
 ## Usage
 
+* __merge(a, b, _options_)__
+* __merge.all([a, b, ..., z], _options_)__
+
+Where `a`, `b`, `z` are [Babel configuration objects](https://babeljs.io/docs/usage/api/#options) and `options` is a [deepmerge](https://github.com/KyleAMathews/deepmerge#api) options object.
+
 ```js
 const merge = require('babel-merge');
 
 const together = merge(
   {
     presets: [
-      ['babel-preset-env', {
+      ['@babel/preset-env', {
         targets: {
           browsers: ['latest 1 Chrome']
         }
@@ -42,7 +47,7 @@ const together = merge(
   },
   {
     presets: [
-      ['babel-preset-env', {
+      ['@babel/preset-env', {
         targets: {
           browsers: ['latest 1 Firefox']
         }
@@ -55,7 +60,7 @@ console.log(together);
 
 {
   presets: [
-    ['babel-preset-env', {
+    ['@babel/preset-env', {
       targets: {
         browsers: [
           'latest 1 Chrome',
@@ -75,7 +80,7 @@ const merge = require('babel-merge');
 const together = merge(
   {
     presets: [
-      [require.resolve('babel-preset-env'), {
+      [require.resolve('@babel/preset-env'), {
         targets: {
           browsers: ['latest 1 Chrome']
         }
@@ -84,7 +89,7 @@ const together = merge(
   },
   {
     presets: [
-      ['babel-preset-env', {
+      ['@babel/preset-env', {
         targets: {
           browsers: ['latest 1 Firefox']
         }
@@ -97,7 +102,7 @@ console.log(together);
 
 {
   presets: [
-    ['/Users/me/code/app/node_modules/babel-preset-env/lib/index.js', {
+    ['/Users/me/code/app/node_modules/@babel/preset-env/lib/index.js', {
       targets: {
         browsers: [
           'latest 1 Chrome',
@@ -119,7 +124,7 @@ const together = merge(
     env: {
       development: {
         presets: [
-          [require.resolve('babel-preset-env'), {
+          [require.resolve('@babel/preset-env'), {
             targets: {
               browsers: ['latest 1 Chrome']
             }
@@ -132,7 +137,7 @@ const together = merge(
     env: {
       development: {
         presets: [
-          ['babel-preset-env', {
+          ['@babel/preset-env', {
             targets: {
               browsers: ['latest 1 Firefox']
             }
@@ -149,7 +154,7 @@ console.log(together);
   env: {
     development: {
       presets: [
-        ['/Users/me/code/app/node_modules/babel-preset-env/lib/index.js', {
+        ['/Users/me/code/app/node_modules/@babel/preset-env/lib/index.js', {
           targets: {
             browsers: [
               'latest 1 Chrome',
@@ -171,15 +176,15 @@ const merge = require('babel-merge');
 const together = merge(
   {
     plugins: [
-      'fast-async',
-      'babel-plugin-syntax-dynamic-import'
+      'module:fast-async',
+      '@babel/plugin-syntax-dynamic-import'
     ]
   },
   {
     plugins: [
-      'babel-plugin-transform-object-rest-spread',
-      ['fast-async', { spec: true }],
-      'babel-plugin-transform-class-properties'
+      '@babel/plugin-proposal-object-rest-spread',
+      ['module:fast-async', { spec: true }],
+      '@babel/plugin-proposal-class-properties'
     ]
   }
 )
@@ -188,10 +193,10 @@ console.log(together);
 
 {
   plugins: [
-    ['fast-async', { 'spec': true }],
-    'babel-plugin-syntax-dynamic-import',
-    'babel-plugin-transform-object-rest-spread',
-    'babel-plugin-transform-class-properties'
+    ['module:fast-async', { 'spec': true }],
+    '@babel/plugin-syntax-dynamic-import',
+    '@babel/plugin-proposal-object-rest-spread',
+    '@babel/plugin-proposal-class-properties'
   ]
 }
 ```
