@@ -1,16 +1,25 @@
-const assert = require('assert');
+import assert from 'assert';
 
-const merge = require('./src');
+import * as babel from '@babel/core';
+import omit from 'object.omit';
+
+import babelMerge from '../src';
+
+function formatBabelConfig({ file, options }) {
+  return options ? [file.resolved, options] : file.resolved;
+}
 
 describe('babel-merge', () => {
   it('should deeply merge preset options', () => {
-    assert.deepEqual(
-      merge(
+    assert.deepStrictEqual(
+      babelMerge(
         {
           presets: [
             ['@babel/env', {
               targets: {
-                browsers: ['latest 1 Chrome']
+                browsers: [
+                  'latest 1 Chrome'
+                ]
               }
             }]
           ]
@@ -19,7 +28,9 @@ describe('babel-merge', () => {
           presets: [
             ['@babel/env', {
               targets: {
-                browsers: ['latest 1 Firefox']
+                browsers: [
+                  'latest 1 Firefox'
+                ]
               }
             }]
           ]
@@ -30,7 +41,6 @@ describe('babel-merge', () => {
           [require.resolve('@babel/preset-env'), {
             targets: {
               browsers: [
-                'latest 1 Chrome',
                 'latest 1 Firefox'
               ]
             }
@@ -41,13 +51,15 @@ describe('babel-merge', () => {
   });
 
   it('should merge by resolved name', () => {
-    assert.deepEqual(
-      merge(
+    assert.deepStrictEqual(
+      babelMerge(
         {
           presets: [
             [require.resolve('@babel/preset-env'), {
               targets: {
-                browsers: ['latest 1 Chrome']
+                browsers: [
+                  'latest 1 Chrome'
+                ]
               }
             }]
           ]
@@ -56,7 +68,9 @@ describe('babel-merge', () => {
           presets: [
             ['@babel/env', {
               targets: {
-                browsers: ['latest 1 Firefox']
+                browsers: [
+                  'latest 1 Firefox'
+                ]
               }
             }]
           ]
@@ -67,7 +81,6 @@ describe('babel-merge', () => {
           [require.resolve('@babel/preset-env'), {
             targets: {
               browsers: [
-                'latest 1 Chrome',
                 'latest 1 Firefox'
               ]
             }
@@ -78,15 +91,17 @@ describe('babel-merge', () => {
   });
 
   it('should merge env options', () => {
-    assert.deepEqual(
-      merge(
+    assert.deepStrictEqual(
+      babelMerge(
         {
           env: {
             development: {
               presets: [
                 [require.resolve('@babel/preset-env'), {
                   targets: {
-                    browsers: ['latest 1 Chrome']
+                    browsers: [
+                      'latest 1 Chrome'
+                    ]
                   }
                 }]
               ]
@@ -99,7 +114,9 @@ describe('babel-merge', () => {
               presets: [
                 ['@babel/env', {
                   targets: {
-                    browsers: ['latest 1 Firefox']
+                    browsers: [
+                      'latest 1 Firefox'
+                    ]
                   }
                 }]
               ]
@@ -114,7 +131,6 @@ describe('babel-merge', () => {
               [require.resolve('@babel/preset-env'), {
                 targets: {
                   browsers: [
-                    'latest 1 Chrome',
                     'latest 1 Firefox'
                   ]
                 }
@@ -127,16 +143,24 @@ describe('babel-merge', () => {
   });
 
   it('should preserve plugin / preset order', () => {
-    assert.deepEqual(
-      merge(
+    assert.deepStrictEqual(
+      babelMerge(
         {
+          presets: [
+            './test/local-preset'
+          ],
           plugins: [
             'module:fast-async',
-            '@babel/plugin-syntax-dynamic-import'
+            '@babel/plugin-syntax-dynamic-import',
+            './test/local-plugin'
           ]
         },
         {
+          presets: [
+            '@babel/env'
+          ],
           plugins: [
+            ['./test/local-plugin', { foo: 'bar' }],
             '@babel/plugin-proposal-object-rest-spread',
             ['module:fast-async', { spec: true }],
             '@babel/plugin-proposal-class-properties'
@@ -144,9 +168,14 @@ describe('babel-merge', () => {
         }
       ),
       {
+        presets: [
+          require.resolve('./local-preset'),
+          require.resolve('@babel/preset-env')
+        ],
         plugins: [
           [require.resolve('fast-async'), { 'spec': true }],
           require.resolve('@babel/plugin-syntax-dynamic-import'),
+          [require.resolve('./local-plugin'), { foo: 'bar' }],
           require.resolve('@babel/plugin-proposal-object-rest-spread'),
           require.resolve('@babel/plugin-proposal-class-properties')
         ]
@@ -155,8 +184,8 @@ describe('babel-merge', () => {
   });
 
   it('should merge an array of config objects', () => {
-    assert.deepEqual(
-      merge.all([
+    assert.deepStrictEqual(
+      babelMerge.all([
         {
           presets: [
             require.resolve('@babel/preset-env')
@@ -182,13 +211,15 @@ describe('babel-merge', () => {
   });
 
   it('should dedupe merged arrays', () => {
-    assert.deepEqual(
-      merge.all([
+    assert.deepStrictEqual(
+      babelMerge.all([
         {
           presets: [
             [require.resolve('@babel/preset-env'), {
               targets: {
-                browsers: ['latest 1 Chrome']
+                browsers: [
+                  'latest 1 Chrome'
+                ]
               }
             }]
           ]
@@ -197,7 +228,9 @@ describe('babel-merge', () => {
           presets: [
             ['@babel/preset-env', {
               targets: {
-                browsers: ['latest 1 Chrome']
+                browsers: [
+                  'latest 1 Chrome'
+                ]
               }
             }]
           ]
@@ -206,7 +239,9 @@ describe('babel-merge', () => {
           presets: [
             ['@babel/env', {
               targets: {
-                browsers: ['latest 1 Chrome']
+                browsers: [
+                  'latest 1 Chrome'
+                ]
               }
             }]
           ]
@@ -216,7 +251,9 @@ describe('babel-merge', () => {
         presets: [
           [require.resolve('@babel/preset-env'), {
             targets: {
-              browsers: ['latest 1 Chrome']
+              browsers: [
+                'latest 1 Chrome'
+              ]
             }
           }]
         ]
@@ -226,10 +263,6 @@ describe('babel-merge', () => {
 
   it('should support ES6+ data structures', () => {
     const a = {
-      Symbol: [
-        Symbol('1'),
-        Symbol.for('2')
-      ],
       Map: new Map([['a', 'a']]),
       Set: new Set(['a']),
       WeakMap: new WeakMap([[{ a: true }, 'a']]),
@@ -237,10 +270,6 @@ describe('babel-merge', () => {
     };
 
     const b = {
-      Symbol: [
-        Symbol('1'),
-        Symbol.for('2')
-      ],
       Map: new Map([['b', 'b']]),
       Set: new Set(['b']),
       WeakMap: new WeakMap([[{ b: true }, 'b']]),
@@ -248,10 +277,6 @@ describe('babel-merge', () => {
     };
 
     const c = {
-      Symbol: [
-        Symbol('1'),
-        Symbol.for('2')
-      ],
       Map: new Map([['c', 'c']]),
       Set: new Set(['c']),
       WeakMap: new WeakMap([[{ c: true }, 'c']]),
@@ -259,29 +284,22 @@ describe('babel-merge', () => {
     };
 
     assert.deepStrictEqual(
-      merge.all([
+      babelMerge.all([
         { presets: [[require.resolve('@babel/preset-env'), a]] },
         { presets: [['@babel/preset-env', b]] },
         { presets: [['@babel/env', c]] }
       ]),
       {
         presets: [
-          [require.resolve('@babel/preset-env'), {
-            ...c,
-            Symbol: [
-              ...a.Symbol,
-              b.Symbol[0],
-              c.Symbol[0]
-            ]
-          }]
+          [require.resolve('@babel/preset-env'), c]
         ]
       }
     );
   });
 
   it('should support deepmerge option overrides', () => {
-    assert.deepEqual(
-      merge(
+    assert.deepStrictEqual(
+      babelMerge(
         {
           presets: [
             ['@babel/env', {
@@ -296,7 +314,7 @@ describe('babel-merge', () => {
       ),
       {
         presets: [
-          ['@babel/env', {
+          [require.resolve('@babel/preset-env'), {
             targets: {
               browsers: {}
             }
@@ -305,8 +323,8 @@ describe('babel-merge', () => {
       }
     );
 
-    assert.deepEqual(
-      merge.all(
+    assert.deepStrictEqual(
+      babelMerge.all(
         [{
           presets: [
             ['@babel/env', {
@@ -320,13 +338,53 @@ describe('babel-merge', () => {
       ),
       {
         presets: [
-          ['@babel/env', {
+          [require.resolve('@babel/preset-env'), {
             targets: {
               browsers: {}
             }
           }]
         ]
       }
+    );
+  });
+
+  it("should mirror babel's merge behavior", () => {
+    function getOverrides() {
+      return {
+        presets: [
+          ['./test/local-preset', { foo: 'bar' }],
+          [
+            '@babel/env',
+            {
+              targets: {
+                browsers: ['>= 0.25%', 'not dead']
+              }
+            }
+          ]
+        ],
+        plugins: [
+          '@babel/plugin-proposal-object-rest-spread',
+          ['module:fast-async', { spec: true }],
+          '@babel/plugin-proposal-class-properties'
+        ]
+      };
+    }
+
+    const { options: { presets, plugins } } = babel.loadPartialConfig({
+      ...getOverrides(),
+      configFile: require.resolve('./.babelrc.test')
+    });
+
+    delete require.cache[require.resolve('./.babelrc.test')];
+
+    const babelrc = require('./.babelrc.test');
+
+    assert.deepStrictEqual(
+      {
+        presets: presets.map(formatBabelConfig),
+        plugins: plugins.map(formatBabelConfig)
+      },
+      omit(babelMerge.all([babelrc, babelrc.env.test, getOverrides()]), ['env'])
     );
   });
 });

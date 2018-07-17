@@ -14,7 +14,7 @@
     "prebuild": "yarpm run clean",
     "precommit": "yarpm test",
     "prepublishOnly": "yarpm run build",
-    "test": "BABEL_ENV=test nyc mocha -r @babel/register"
+    "test": "BABEL_ENV=test nyc mocha 'test/**/*.test.js' -r @babel/register"
   },
   "dependencies": {
     "@babel/core": "^7.0.0-beta.49",

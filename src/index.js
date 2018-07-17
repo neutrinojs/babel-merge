@@ -1,40 +1,29 @@
-const omit = require('object.omit');
-const merge = require('deepmerge');
-const isPlainObject = require('is-plain-object');
-const { resolvePlugin, resolvePreset } = require('@babel/core');
+import omit from 'object.omit';
+import merge from 'deepmerge';
+import isPlainObject from 'is-plain-object';
+import { resolvePlugin, resolvePreset } from '@babel/core';
 
-const deepmergeDefaults = Object.freeze({
-  arrayMerge: (source = [], overrides = []) => [...new Set([...source, ...overrides])],
-  isMergeableObject: value => isPlainObject(value) || Array.isArray(value)
-});
+function arrayMerge(source = [], overrides = []) {
+  return [...new Set([...source, ...overrides])];
+}
 
 function mergeArray(source = [], overrides = [], resolve, deepmergeOpts) {
-  if (!source.length) {
-    return overrides;
-  }
-
-  if (!overrides.length) {
-    return source;
-  }
-
   return [...source, ...overrides].reduce((reduction, override) => {
     const overrideName = resolve(Array.isArray(override) ? override[0] : override);
     const overrideOptions = Array.isArray(override) ? override[1] : {};
     const base = reduction.find((base) => {
       const baseName = resolve(Array.isArray(base) ? base[0] : base);
-
       return baseName === overrideName || baseName.includes(overrideName);
     });
 
-    if (!base) {
-      reduction.push(Array.isArray(override) ? [overrideName, overrideOptions] : overrideName);
-      return reduction;
-    }
-
-    const index = reduction.indexOf(base);
-    const baseName = resolve(Array.isArray(base) ? base[0] : base);
+    const index = reduction.includes(base) ? reduction.indexOf(base) : reduction.length;
+    const baseName = base ? resolve(Array.isArray(base) ? base[0] : base) : overrideName;
     const baseOptions = Array.isArray(base) ? base[1] : {};
-    const options = merge(baseOptions, overrideOptions, { ...deepmergeDefaults, ...deepmergeOpts });
+    const options = merge(baseOptions, overrideOptions, {
+      arrayMerge,
+      isMergeableObject: value => Array.isArray(value),
+      ...deepmergeOpts
+    });
 
     reduction[index] = Object.keys(options).length ? [baseName, options] : baseName;
 
@@ -45,31 +34,24 @@ function mergeArray(source = [], overrides = [], resolve, deepmergeOpts) {
 function babelMerge(source = {}, overrides = {}, deepmergeOpts) {
   const plugins = mergeArray(source.plugins, overrides.plugins, resolvePlugin, deepmergeOpts);
   const presets = mergeArray(source.presets, overrides.presets, resolvePreset, deepmergeOpts);
-
-  return merge.all([
-    omit(source, ['plugins', 'presets', 'env']),
-    omit(overrides, ['plugins', 'presets', 'env']),
-    plugins.length ? { plugins } : {},
+  const sourceEnv = source.env || {};
+  const overridesEnv = overrides.env || {};
+  return Object.assign(
     presets.length ? { presets } : {},
-    ...[...new Set([
-      ...Object.keys(source.env || {}),
-      ...Object.keys(overrides.env || {})
-    ])].map(name => ({
-      env: {
-        [name]: (() => {
-          if (source.env && source.env[name] && (!overrides.env || !overrides.env[name])) {
-            return source.env[name];
-          }
-
-          if (overrides.env && overrides.env[name] && (!source.env || !source.env[name])) {
-            return overrides.env[name];
-          }
-
-          return babelMerge(source.env[name], overrides.env[name], deepmergeOpts);
-        })()
-      }
-    }))
-  ], { ...deepmergeDefaults, ...deepmergeOpts });
+    plugins.length ? { plugins } : {},
+    merge.all([
+      omit(source, ['plugins', 'presets', 'env']),
+      omit(overrides, ['plugins', 'presets', 'env']),
+      ...[...new Set([
+        ...Object.keys(sourceEnv),
+        ...Object.keys(overridesEnv)
+      ])].map(name => ({
+        env: {
+          [name]: babelMerge(sourceEnv[name], overridesEnv[name], deepmergeOpts)
+        }
+      }))
+    ], { arrayMerge, ...deepmergeOpts })
+  );
 }
 
 Object.defineProperty(babelMerge, 'all', {
