@@ -19,7 +19,6 @@
   "dependencies": {
     "@babel/core": "^7.0.0-beta.49",
     "deepmerge": "^2.1.0",
-    "is-plain-object": "^2.0.4",
     "object.omit": "^3.0.0"
   },
   "devDependencies": {
