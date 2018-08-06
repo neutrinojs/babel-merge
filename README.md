@@ -1,8 +1,13 @@
 # babel-merge
-[![NPM version][npm-image]][npm-url] [![NPM downloads][npm-downloads]][npm-url]
 
 `babel-merge` merges multiple Babel configuration objects into a single copy.
 Plugin and preset objects and arrays will be merged together.
+
+[![NPM version][npm-image]][npm-url] [![NPM downloads][npm-downloads]][npm-url]
+
+_Note: **options** to plugins and presets **will not be merged**, but instead
+replaced by the last matching item's options. This makes the behavior consistent
+with how Babel works._
 
 ## Requirements
 
@@ -63,7 +68,6 @@ console.log(together);
     ['@babel/preset-env', {
       targets: {
         browsers: [
-          'latest 1 Chrome',
           'latest 1 Firefox'
         ]
       }
@@ -105,7 +109,6 @@ console.log(together);
     ['/Users/me/code/app/node_modules/@babel/preset-env/lib/index.js', {
       targets: {
         browsers: [
-          'latest 1 Chrome',
           'latest 1 Firefox'
         ]
       }
@@ -157,7 +160,6 @@ console.log(together);
         ['/Users/me/code/app/node_modules/@babel/preset-env/lib/index.js', {
           targets: {
             browsers: [
-              'latest 1 Chrome',
               'latest 1 Firefox'
             ]
           }
@@ -193,7 +195,7 @@ console.log(together);
 
 {
   plugins: [
-    ['module:fast-async', { 'spec': true }],
+    ['module:fast-async', { spec: true }],
     '@babel/plugin-syntax-dynamic-import',
     '@babel/plugin-proposal-object-rest-spread',
     '@babel/plugin-proposal-class-properties'

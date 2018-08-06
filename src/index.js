@@ -1,6 +1,5 @@
 import omit from 'object.omit';
 import merge from 'deepmerge';
-import isPlainObject from 'is-plain-object';
 import { resolvePlugin, resolvePreset } from '@babel/core';
 
 function arrayMerge(source = [], overrides = []) {
