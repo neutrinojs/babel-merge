@@ -3,7 +3,8 @@
 `babel-merge` merges multiple Babel configuration objects into a single copy.
 Plugin and preset objects and arrays will be merged together.
 
-[![NPM version][npm-image]][npm-url] [![NPM downloads][npm-downloads]][npm-url]
+[![NPM version][npm-image]][npm-url]
+[![NPM downloads][npm-downloads]][npm-url]
 
 _Note: **options** to plugins and presets **will not be merged**, but instead
 replaced by the last matching item's options. This makes the behavior consistent

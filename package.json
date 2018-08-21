@@ -4,7 +4,7 @@
   "main": "dist",
   "author": "Eli Perelman <eli@eliperelman.com>",
   "license": "MIT",
-  "repository": "eliperelman/babel-merge",
+  "repository": "neutrinojs/babel-merge",
   "engines:": {
     "node": ">=6.10.0"
   },
