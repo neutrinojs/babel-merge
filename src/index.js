@@ -1,6 +1,6 @@
-import omit from 'object.omit';
-import merge from 'deepmerge';
-import { resolvePlugin, resolvePreset } from '@babel/core';
+const omit = require('object.omit');
+const merge = require('deepmerge');
+const { resolvePlugin, resolvePreset } = require('@babel/core');
 
 function arrayMerge(source = [], overrides = []) {
   return [...new Set([...source, ...overrides])];
