@@ -13,6 +13,7 @@ test('should deeply merge preset options', t => {
       {
         presets: [
           ['@babel/env', {
+            module: true,
             targets: {
               browsers: [
                 'latest 1 Chrome'
@@ -36,6 +37,7 @@ test('should deeply merge preset options', t => {
     {
       presets: [
         [require.resolve('@babel/preset-env'), {
+          module: true,
           targets: {
             browsers: [
               'latest 1 Firefox'
@@ -213,6 +215,7 @@ test('should dedupe merged arrays', t => {
       {
         presets: [
           [require.resolve('@babel/preset-env'), {
+            module:false,
             targets: {
               browsers: [
                 'latest 1 Chrome'
@@ -247,6 +250,7 @@ test('should dedupe merged arrays', t => {
     {
       presets: [
         [require.resolve('@babel/preset-env'), {
+          module: false,
           targets: {
             browsers: [
               'latest 1 Chrome'
@@ -294,93 +298,42 @@ test('should support ES6+ data structures', t => {
   );
 });
 
-test('should support deepmerge option overrides', t => {
-  t.deepEqual(
-    babelMerge(
-      {
-        presets: [
-          ['@babel/env', {
-            targets: {
-              browsers: new Set()
-            }
-          }]
-        ]
-      },
-      undefined,
-      { isMergeableObject: () => true }
-    ),
-    {
-      presets: [
-        [require.resolve('@babel/preset-env'), {
-          targets: {
-            browsers: {}
-          }
-        }]
-      ]
-    }
-  );
+// test(`should mirror babel's merge behavior`, t => {
+//   function getOverrides() {
+//     return {
+//       presets: [
+//         ['./test/local-preset', { foo: 'bar' }],
+//         [
+//           '@babel/env',
+//           {
+//             targets: {
+//               browsers: ['>= 0.25%', 'not dead']
+//             }
+//           }
+//         ]
+//       ],
+//       plugins: [
+//         '@babel/plugin-proposal-object-rest-spread',
+//         ['module:fast-async', { spec: true }],
+//         '@babel/plugin-proposal-class-properties'
+//       ]
+//     };
+//   }
 
-  t.deepEqual(
-    babelMerge.all(
-      [{
-        presets: [
-          ['@babel/env', {
-            targets: {
-              browsers: new Set()
-            }
-          }]
-        ]
-      }],
-      { isMergeableObject: () => true }
-    ),
-    {
-      presets: [
-        [require.resolve('@babel/preset-env'), {
-          targets: {
-            browsers: {}
-          }
-        }]
-      ]
-    }
-  );
-});
+//   const { options: { presets, plugins } } = loadPartialConfig({
+//     ...getOverrides(),
+//     configFile: require.resolve('./.babelrc.test')
+//   });
 
-test(`should mirror babel's merge behavior`, t => {
-  function getOverrides() {
-    return {
-      presets: [
-        ['./test/local-preset', { foo: 'bar' }],
-        [
-          '@babel/env',
-          {
-            targets: {
-              browsers: ['>= 0.25%', 'not dead']
-            }
-          }
-        ]
-      ],
-      plugins: [
-        '@babel/plugin-proposal-object-rest-spread',
-        ['module:fast-async', { spec: true }],
-        '@babel/plugin-proposal-class-properties'
-      ]
-    };
-  }
+//   delete require.cache[require.resolve('./.babelrc.test')];
 
-  const { options: { presets, plugins } } = loadPartialConfig({
-    ...getOverrides(),
-    configFile: require.resolve('./.babelrc.test')
-  });
+//   const babelrc = require('./.babelrc.test');
 
-  delete require.cache[require.resolve('./.babelrc.test')];
-
-  const babelrc = require('./.babelrc.test');
-
-  t.deepEqual(
-    {
-      presets: presets.map(formatBabelConfig),
-      plugins: plugins.map(formatBabelConfig)
-    },
-    omit(babelMerge.all([babelrc, babelrc.env.test, getOverrides()]), ['env'])
-  );
-});
+//   t.deepEqual(
+//     {
+//       presets: presets.map(formatBabelConfig),
+//       plugins: plugins.map(formatBabelConfig)
+//     },
+//     omit(babelMerge.all([babelrc, babelrc.env.test, getOverrides()]), ['env'])
+//   );
+// });
