@@ -298,42 +298,43 @@ test('should support ES6+ data structures', t => {
   );
 });
 
-// test(`should mirror babel's merge behavior`, t => {
-//   function getOverrides() {
-//     return {
-//       presets: [
-//         ['./test/local-preset', { foo: 'bar' }],
-//         [
-//           '@babel/env',
-//           {
-//             targets: {
-//               browsers: ['>= 0.25%', 'not dead']
-//             }
-//           }
-//         ]
-//       ],
-//       plugins: [
-//         '@babel/plugin-proposal-object-rest-spread',
-//         ['module:fast-async', { spec: true }],
-//         '@babel/plugin-proposal-class-properties'
-//       ]
-//     };
-//   }
-
-//   const { options: { presets, plugins } } = loadPartialConfig({
-//     ...getOverrides(),
-//     configFile: require.resolve('./.babelrc.test')
-//   });
-
-//   delete require.cache[require.resolve('./.babelrc.test')];
-
-//   const babelrc = require('./.babelrc.test');
-
-//   t.deepEqual(
-//     {
-//       presets: presets.map(formatBabelConfig),
-//       plugins: plugins.map(formatBabelConfig)
-//     },
-//     omit(babelMerge.all([babelrc, babelrc.env.test, getOverrides()]), ['env'])
-//   );
-// });
+test('test merge plugins for import', (t) => {
+  const _import = require.resolve('babel-plugin-import');
+  t.deepEqual(babelMerge(
+    {
+      plugins: [
+        ['import', {
+          'libraryName': 'antd',
+          'style': 'css',
+        }, 'antd'],
+        "lodash",
+        ['import', {
+          'libraryName': '@mlz/doraemon',
+          'camel2DashComponentName': false,
+        }, 'doraemon'],
+      ]
+    },
+    {
+      plugins: [[
+        "import",
+        {
+          libraryName: "antd",
+          style: "css"
+        }
+      ],
+    ],
+    }
+  ), {
+    plugins: [
+      [_import, {
+        'libraryName': 'antd',
+        'style': 'css',
+      }, 'antd'],
+      require.resolve("babel-plugin-lodash"),
+      [_import, {
+        'libraryName': '@mlz/doraemon',
+        'camel2DashComponentName': false,
+      }, '@mlz/doraemon'],
+    ]
+  })
+})

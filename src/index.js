@@ -7,10 +7,37 @@ function arrayMerge(source = [], overrides = []) {
   return [...new Set([...source, ...overrides])];
 }
 
+const mergeImportReducer = (reduction, override, resolve) => {
+  const oName = override[0];
+  let oOptions = override[1];
+  if (!oOptions) {
+    oOptions = {}
+  }
+  const base = reduction.find((base) => {
+    if (Array.isArray(base) && base[0] === resolve("import")) {
+      const libraryName = base[1] ? base[1].libraryName : ''
+      return libraryName === oOptions.libraryName
+    }
+    return false
+  });
+  if (base) {
+    const index = reduction.indexOf(base);
+    const options = simpleMerge(base[1] || {}, oOptions);
+    reduction[index] = [resolve("import"), options, options.libraryName]
+  } else {
+    reduction.push([resolve(oName), oOptions, oOptions.libraryName])
+  }
+  return reduction
+}
+
 function mergeArray(source = [], overrides = [], resolve) {
   return [...source, ...overrides].reduce((reduction, override) => {
-    const overrideName = resolve(Array.isArray(override) ? override[0] : override);
-    const overrideOptions = Array.isArray(override) ? override[1] : {};
+    const isArray = Array.isArray(override)
+    if (isArray && override[0] === 'import') {
+      return mergeImportReducer(reduction, override, resolve)
+    }
+    const overrideName = resolve(isArray ? override[0] : override);
+    const overrideOptions = isArray ? override[1] : {};
     const base = reduction.find((base) => {
       const baseName = resolve(Array.isArray(base) ? base[0] : base);
       return baseName === overrideName || baseName.includes(overrideName);
