@@ -12,7 +12,7 @@
     "test": "ava --fail-fast test/babel-merge_test.js"
   },
   "dependencies": {
-    "deepmerge": "^2.2.1",
+    "deepmerge": "^4.0.0",
     "object.omit": "^3.0.0"
   },
   "devDependencies": {
